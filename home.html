@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>الرئيسية | Full Mark</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2 id="welcomeMsg">أهلاً بك يا بطل</h2>
+        <button onclick="logout()">خروج</button>
+    </nav>
+
+    <div class="grid" id="subjectsGrid">
+        </div>
+
+    <script>
+        const level = localStorage.getItem('userLevel');
+        const name = localStorage.getItem('userName');
+        document.getElementById('welcomeMsg').innerText = `أهلاً بك يا ${name}`;
+
+        // قائمة المواد (يمكنك تعديلها)
+        const subjects = [
+            { id: 'physics', name: 'الفيزياء', img: 'images/phys.png' },
+            { id: 'chemistry', name: 'الكيمياء', img: 'images/chem.png' },
+            { id: 'arabic', name: 'اللغة العربية', img: 'images/arab.png' }
+        ];
+
+        const grid = document.getElementById('subjectsGrid');
+        subjects.forEach(sub => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h3>${sub.name}</h3>
+                <button onclick="goToLessons('${sub.id}')">مشاهدة الحصص</button>
+            `;
+            grid.appendChild(card);
+        });
+
+        function goToLessons(subId) {
+            localStorage.setItem('currentSubject', subId);
+            window.location.href = 'watch.html';
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
