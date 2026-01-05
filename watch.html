@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مشاهدة الحصص | Full Mark</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+</head>
+<body>
+    <div class="navbar" style="padding:10px 30px;">
+        <h3 id="subTitle" style="margin:0; color:var(--primary)"></h3>
+        <button onclick="window.location.href='home.html'" style="width:auto; background:#334155">عودة</button>
+    </div>
+
+    <div class="player-layout">
+        <div class="video-part">
+            <div id="player" class="plyr__video-embed"></div>
+        </div>
+        <div class="list-part" id="playlist">
+            <p style="padding:20px; color:#aaa">جاري تحميل الحصص...</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://fullmark-2025-default-rtdb.firebaseio.com" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const level = localStorage.getItem('userLevel');
+        const subId = localStorage.getItem('currentSubject');
+        document.getElementById('subTitle').innerText = subId.toUpperCase();
+
+        const videoRef = ref(db, `content/${level}/${subId}`);
+        let plyrPlayer = null;
+
+        onValue(videoRef, (snapshot) => {
+            const list = document.getElementById('playlist');
+            list.innerHTML = "";
+            const data = snapshot.val();
+
+            if (data) {
+                Object.values(data).forEach((lesson, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'lesson-item';
+                    item.innerText = `${index + 1}. ${lesson.title}`;
+                    item.onclick = () => play(lesson.youtubeId, item);
+                    list.appendChild(item);
+                    
+                    if(index === 0) play(lesson.youtubeId, item);
+                });
+            } else {
+                list.innerHTML = "<p style='padding:20px;'>لا يوجد دروس مرفوعة بعد.</p>";
+            }
+        });
+
+        function play(id, elem) {
+            document.querySelectorAll('.lesson-item').forEach(i => i.classList.remove('active'));
+            elem.classList.add('active');
+            
+            const container = document.getElementById('player');
+            container.innerHTML = `<div id="target" data-plyr-provider="youtube" data-plyr-embed-id="${id}"></div>`;
+            
+            if(plyrPlayer) plyrPlayer.destroy();
+            plyrPlayer = new Plyr('#target');
+        }
+    </script>
+</body>
+</html>
