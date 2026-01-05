@@ -2,72 +2,142 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم | Full Mark</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة المشرف | FULL MARK</title>
     <style>
-        body { font-family: 'Cairo', sans-serif; background: #0f172a; color: white; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: #1e293b; padding: 30px; border-radius: 15px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #00bcd4; border: none; font-weight: bold; cursor: pointer; border-radius: 8px; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f172a;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .admin-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        h2 { text-align: center; color: #00bcd4; margin-bottom: 20px; }
+        
+        label { display: block; margin: 10px 0 5px; color: #cbd5e1; }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-add { background-color: #22c55e; color: white; }
+        .btn-add:hover { background-color: #16a34a; }
+
+        .status-msg {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🛠️ لوحة تحكم المنصة</h2>
-    <h3>إضافة طالب (كود مفعل)</h3>
-    <input type="text" id="sName" placeholder="اسم الطالب">
-    <input type="text" id="sCode" placeholder="الكود (مثلاً: 5050)">
-    <select id="sLevel">
-        <option value="1sec">أولى ثانوي</option>
-        <option value="2sec">تانية ثانوي</option>
-        <option value="3sec">تالتة ثانوي</option>
-    </select>
-    <button onclick="addStudent()">تفعيل الكود أونلاين</button>
+    <div class="admin-container">
+        <h2>🛠️ لوحة تفعيل أكواد الطلاب</h2>
+        
+        <label>اسم الطالب:</label>
+        <input type="text" id="sName" placeholder="اكتب اسم الطالب رباعي">
 
-    <hr style="margin:20px 0; opacity:0.1">
+        <label>كود الكارت:</label>
+        <input type="text" id="sCode" placeholder="رقم الكود (مثلاً: 5050)">
 
-    <h3>إضافة فيديو (تالتة ثانوي)</h3>
-    <input type="text" id="vTitle" placeholder="عنوان الحصة">
-    <input type="text" id="vId" placeholder="ID فيديو يوتيوب">
-    <button onclick="addVideo()" style="background:#f59e0b">نشر الفيديو</button>
-</div>
+        <label>الصف الدراسي:</label>
+        <select id="sLevel">
+            <option value="1sec">الصف الأول الثانوي</option>
+            <option value="2sec">الصف الثاني الثانوي</option>
+            <option value="3sec">الصف الثالث الثانوي</option>
+        </select>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        <button class="btn-add" id="addBtn">✅ تفعيل الكود للطالب</button>
+        <p class="status-msg" id="msg"></p>
+    </div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyD1QB3qaFfkGYq0OWOEAr83V25NAPFwxzs",
-        authDomain: "fullmark-2025.firebaseapp.com",
-        databaseURL: "https://fullmark-2025-default-rtdb.firebaseio.com",
-        projectId: "fullmark-2025",
-        storageBucket: "fullmark-2025.firebasestorage.app",
-        messagingSenderId: "963956202032",
-        appId: "1:963956202032:web:4df914457d79b75dee2bf5"
-    };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        // إعدادات مشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1QB3qaFfkGYq0OWOEAr83V25NAPFwxzs",
+            authDomain: "fullmark-2025.firebaseapp.com",
+            databaseURL: "https://fullmark-2025-default-rtdb.firebaseio.com",
+            projectId: "fullmark-2025",
+            storageBucket: "fullmark-2025.firebasestorage.app",
+            messagingSenderId: "963956202032",
+            appId: "1:963956202032:web:4df914457d79b75dee2bf5"
+        };
 
-    window.addStudent = function() {
-        const code = document.getElementById('sCode').value;
-        const name = document.getElementById('sName').value;
-        const level = document.getElementById('sLevel').value;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        set(ref(db, 'students/' + code), {
-            name: name,
-            level: level,
-            active: true
-        }).then(() => alert("تم تفعيل الكود بنجاح!"));
-    }
+        document.getElementById('addBtn').addEventListener('click', function() {
+            const name = document.getElementById('sName').value;
+            const code = document.getElementById('sCode').value;
+            const level = document.getElementById('sLevel').value;
+            const msg = document.getElementById('msg');
 
-    window.addVideo = function() {
-        const title = document.getElementById('vTitle').value;
-        const vid = document.getElementById('vId').value;
-        const videoRef = ref(db, 'content/3sec/physics'); // كمثال للفيزياء
-        push(videoRef, { title: title, youtubeId: vid });
-        alert("تم نشر الفيديو!");
-    }
-</script>
+            if(name === "" || code === "") {
+                alert("اكتب البيانات كاملة يا هندسة!");
+                return;
+            }
+
+            // إرسال البيانات لقاعدة البيانات
+            set(ref(db, 'students/' + code), {
+                name: name,
+                level: level,
+                active: true,
+                date: new Date().toISOString()
+            })
+            .then(() => {
+                msg.style.display = 'block';
+                msg.style.color = '#22c55e';
+                msg.innerText = "تم تفعيل كود الطالب بنجاح! 🎉";
+                
+                // تفريغ الخانات
+                document.getElementById('sName').value = '';
+                document.getElementById('sCode').value = '';
+            })
+            .catch((error) => {
+                msg.style.display = 'block';
+                msg.style.color = 'red';
+                msg.innerText = "حصل خطأ: " + error.message;
+            });
+        });
+    </script>
+
 </body>
 </html>
