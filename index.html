@@ -1,31 +1,181 @@
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | FULL MARK</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyD1QB3qaFfkGYq0OWOEAr83V25NAPFwxzs",
-        authDomain: "fullmark-2025.firebaseapp.com",
-        databaseURL: "https://fullmark-2025-default-rtdb.firebaseio.com",
-        projectId: "fullmark-2025",
-        appId: "1:963956202032:web:4df914457d79b75dee2bf5"
-    };
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f172a; /* لون خلفية غامق */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        .login-container {
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid #334155;
+        }
 
-    window.login = function() {
-        const code = document.getElementById('userCode').value;
-        const dbRef = ref(db);
+        .logo-area {
+            font-size: 30px;
+            font-weight: bold;
+            color: #00bcd4;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .logo-area span {
+            color: #fff;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #334155;
+            background-color: #0f172a;
+            color: white;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #00bcd4;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #00bcd4;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #008ba3;
+            transform: translateY(-2px);
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo-area">FULL <span>MARK</span></div>
+        <p class="subtitle">منصة التعليم الإلكتروني للمرحلة الثانوية</p>
         
-        get(child(dbRef, `students/${code}`)).then((snapshot) => {
-            if (snapshot.exists() && snapshot.val().active) {
-                const user = snapshot.val();
-                localStorage.setItem('userLevel', user.level);
-                localStorage.setItem('userName', user.name);
-                window.location.href = 'home.html';
-            } else {
-                alert("الكود غير صحيح أو لم يتم تفعيله من المنفذ!");
+        <input type="text" id="userCode" placeholder="أدخل كود الطالب هنا" autocomplete="off">
+        <button id="loginBtn">دخول للمنصة</button>
+
+        <div class="footer-note">
+            للأكواد والدعم الفني، توجه لأقرب منفذ بيع
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // إعدادات مشروعك بالظبط
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1QB3qaFfkGYq0OWOEAr83V25NAPFwxzs",
+            authDomain: "fullmark-2025.firebaseapp.com",
+            databaseURL: "https://fullmark-2025-default-rtdb.firebaseio.com",
+            projectId: "fullmark-2025",
+            storageBucket: "fullmark-2025.firebasestorage.app",
+            messagingSenderId: "963956202032",
+            appId: "1:963956202032:web:4df914457d79b75dee2bf5"
+        };
+
+        // تهيئة التطبيق
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // دالة تسجيل الدخول
+        window.login = function() {
+            const codeInput = document.getElementById('userCode');
+            const code = codeInput.value.trim();
+            const btn = document.getElementById('loginBtn');
+
+            if(code === "") {
+                alert("برجاء إدخال الكود أولاً");
+                return;
             }
-        });
-    }
-</script>
+
+            // تغيير نص الزر أثناء التحميل
+            btn.innerHTML = "جاري التحقق...";
+            btn.disabled = true;
+
+            const dbRef = ref(db);
+            
+            get(child(dbRef, `students/${code}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    if (user.active) {
+                        // حفظ بيانات الطالب للدخول التلقائي لاحقاً
+                        localStorage.setItem('userLevel', user.level);
+                        localStorage.setItem('userName', user.name);
+                        
+                        // توجيه للصفحة الرئيسية
+                        window.location.href = 'home.html';
+                    } else {
+                        alert("هذا الكود غير مفعل، يرجى مراجعة الإدارة.");
+                        resetBtn();
+                    }
+                } else {
+                    alert("الكود غير صحيح! تأكد من الرقم المكتوب على الكارت.");
+                    resetBtn();
+                }
+            }).catch((error) => {
+                console.error(error);
+                alert("حدث خطأ في الاتصال، تأكد من الإنترنت.");
+                resetBtn();
+            });
+        }
+
+        function resetBtn() {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = "دخول للمنصة";
+            btn.disabled = false;
+        }
+
+        // تشغيل الزر عند الضغط
+        document.getElementById('loginBtn').addEventListener('click', window.login);
+    </script>
+
+</body>
+    </html>
+    
